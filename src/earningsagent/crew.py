@@ -9,12 +9,11 @@ class EarningsCrew:
         with open("src/earningsagent/config/tasks.yaml") as f:
             self.tasks_config = yaml.safe_load(f)
 
-        # Instantiate tools
+
         serper_dev_tool = SerperDevTool()
         scrape_website_tool = ScrapeWebsiteTool()
         website_search_tool = WebsiteSearchTool()
 
-        # Create agents with tools connected where relevant
         self.earnings_fetch_agent = Agent(
             config=self.agents_config["earnings_fetch_agent"],
             tools=[serper_dev_tool, scrape_website_tool, custom_tool],
@@ -33,7 +32,6 @@ class EarningsCrew:
             config=self.agents_config["qa_agent"]
         )
 
-        # Setup tasks and their contexts
         self.fetch_earnings_task = Task(
             config=self.tasks_config["fetch_earnings"],
             agent=self.earnings_fetch_agent
@@ -54,7 +52,6 @@ class EarningsCrew:
             context=[self.summarize_report_task]
         )
 
-        # Build crew with agents and tasks
         self.crew = Crew(
             agents=[
                 self.earnings_fetch_agent,

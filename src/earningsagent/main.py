@@ -5,7 +5,11 @@ import asyncio
 import pandas as pd
 import sqlite3
 from pydantic import BaseModel, Field
-from src.earningsagent.crew import EarningsCrew
+from crew import EarningsCrew
+from dotenv import load_dotenv
+import os
+
+load_dotenv()
 
 class EarningsInput(BaseModel):
     company: str
@@ -36,7 +40,6 @@ async def run_summary(crew, stock, quarter, year):
         include_sentiment=True
     )
     loop = asyncio.get_event_loop()
-    # Run kickoff asynchronously using thread executor
     result = await loop.run_in_executor(
         None,
         crew.kickoff,
@@ -71,4 +74,25 @@ if __name__ == "__main__":
     import warnings
     warnings.filterwarnings("ignore")
     os.environ['OPENAI_MODEL_NAME'] = 'gpt-4o-mini'
-    asyncio.run(main())
+
+    # Robust async compatibility: works in scripts and Jupyter!
+    try:
+        import nest_asyncio
+        nest_asyncio.apply()
+    except ImportError:
+        pass
+    try:
+        asyncio.run(main())
+    except RuntimeError as e:
+        # Fallback for running event loop
+        import sys
+        if "asyncio.run() cannot be called from a running event loop" in str(e):
+            if hasattr(asyncio, 'get_running_loop'):
+                loop = asyncio.get_running_loop()
+            else:
+                loop = asyncio.get_event_loop()
+            import nest_asyncio
+            nest_asyncio.apply()
+            loop.create_task(main())
+        else:
+            raise
