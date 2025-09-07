@@ -1,0 +1,33 @@
+fetch_earnings:
+  description: >
+    Collect earnings data, transcripts, and related financial info for {company} in {quarter} {year}.
+  expected_output: >
+    A comprehensive factually accurate dataset containing revenue, EPS, transcript excerpts, guidance, and sentiment.
+  agent: earnings_fetch_agent
+
+analyze_financials:
+  description: >
+    Perform financial analysis on the earnings data for {company} and extract key findings.
+  expected_output: >
+    Detailed analysis highlighting revenue trends, EPS growth, risks, and outlook.
+  agent: financial_analysis_agent
+  context:
+    - fetch_earnings
+
+summarize_report:
+  description: >
+    Compose a human-readable earnings summary report based on analyzed data for {company}.
+  expected_output: >
+    A concise yet detailed report suitable for stakeholders.
+  agent: summary_writer_agent
+  context:
+    - analyze_financials
+
+quality_check:
+  description: >
+    Conduct quality assurance review of the earnings summary for correctness and completeness.
+  expected_output: >
+    Validated and polished earnings summary conforming to output format.
+  agent: qa_agent
+  context:
+    - summarize_report
